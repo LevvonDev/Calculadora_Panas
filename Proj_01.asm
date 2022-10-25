@@ -23,6 +23,7 @@ TITLE Leonardo Caberlim de Souza RA(22017958) Daniel Scanavini Rossi RA(22000787
 
     MOV AH,01
     INT 21H        ;ESTE BLOCO REGISTRA O PRIMEIRO OPERANDO E O ARMAZENA EM BL
+    XOR BL,BL
     MOV BL,AL
 
     MOV AH,02
@@ -35,6 +36,7 @@ TITLE Leonardo Caberlim de Souza RA(22017958) Daniel Scanavini Rossi RA(22000787
 
     MOV AH,01
     INT 21H        ;ESTE BLOCO REGISTRA O OPERADOR E O ARMAZENA EM CL
+    XOR CL,CL
     MOV CL,AL
 
     MOV AH,02
@@ -56,6 +58,10 @@ TITLE Leonardo Caberlim de Souza RA(22017958) Daniel Scanavini Rossi RA(22000787
 
     CMP CL,'+'
     JE SOMA
+    CMP CL,'-'
+    JE MENOS
+    CMP CL,'*'
+    ;JE MULT
 
 
 
@@ -63,7 +69,7 @@ TITLE Leonardo Caberlim de Souza RA(22017958) Daniel Scanavini Rossi RA(22000787
 SOMA:
     ADD BL,BH
     CMP BL,0AH
-    JA M10
+    JA NM10
 
     
     MOV AH,02
@@ -81,7 +87,7 @@ SOMA:
     INT 21H
     JMP FIM
 
-M10:    
+NM10:    
 
     MOV AH,02
     MOV DL,10
@@ -105,6 +111,51 @@ M10:
     OR DL,30H
     MOV AH,02
     INT 21H
+
+MENOS:
+
+    SUB BL,BH
+    JS  NNEG
+
+    MOV AH,02
+    MOV DL,10
+    INT 21H
+
+    MOV AH,09
+    LEA DX, msg5
+    INT 21H
+
+    OR BL,30H
+
+    MOV AH,02
+    MOV DL,BL
+    INT 21H
+    JMP FIM
+
+NNEG:
+
+    MOV AH,02
+    MOV DL,10
+    INT 21H
+
+    MOV AH,09
+    LEA DX,msg5
+    INT 21h
+
+    MOV AH,02
+    MOV DL,'-'
+    INT 21H
+    
+    NEG BL
+    OR BL,30H
+    MOV DL,BL
+    MOV AH,02
+    MOV DL,BL
+    INT 21H
+
+;MULT:
+
+
 
 
 
