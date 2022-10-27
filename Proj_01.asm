@@ -1,6 +1,6 @@
 TITLE Leonardo Caberlim de Souza RA(22017958) Daniel Scanavini Rossi RA(22000787)
 .model SMALL
-
+.STACK 100H
 .DATA
 
     msg1 DB 'CALCULADORA EM ASSEMBLY',10,'$'
@@ -23,9 +23,9 @@ TITLE Leonardo Caberlim de Souza RA(22017958) Daniel Scanavini Rossi RA(22000787
 
     MOV AH,01
     INT 21H        ;ESTE BLOCO REGISTRA O PRIMEIRO OPERANDO E O ARMAZENA EM BL
-    XOR BL,BL
+    
     MOV BL,AL
-
+    
     MOV AH,02
     MOV DL,10
     INT 21H        ;ESTE BLOCO IMPRIME UM PULA LINHA
@@ -36,7 +36,7 @@ TITLE Leonardo Caberlim de Souza RA(22017958) Daniel Scanavini Rossi RA(22000787
 
     MOV AH,01
     INT 21H        ;ESTE BLOCO REGISTRA O OPERADOR E O ARMAZENA EM CL
-    XOR CL,CL
+    
     MOV CL,AL
 
     MOV AH,02
@@ -49,22 +49,21 @@ TITLE Leonardo Caberlim de Souza RA(22017958) Daniel Scanavini Rossi RA(22000787
 
 
     MOV AH,01
-    INT 21H       ;ESTE BLOCO  REGISTRA O SEGUNDO OPERADOR E O ARMAZENA EM BH
+    INT 21H     ;ESTE BLOCO  REGISTRA O SEGUNDO OPERADOR E O ARMAZENA EM BH
     MOV BH,AL
 
 
-    SUB BL,30H
-    SUB BH,30H
+    AND BL,0FH
+    AND BH,0FH
 
     CMP CL,'+'
     JE SOMA
     CMP CL,'-'
     JE MENOS
     CMP CL,'*'
-    ;JE MULT
-
-
-
+    JE MULT
+    MULT:
+        jmp MULTI
 
 SOMA:
     ADD BL,BH
@@ -153,7 +152,41 @@ NNEG:
     MOV DL,BL
     INT 21H
 
-;MULT:
+MULTI:
+    MOV CX,8
+    XOR DX,DX
+TOPO:
+    TEST BH,1
+    JZ PT1
+    ADD DH,BL
+PT1:
+    SHR DX,1
+    SHR BH,1
+    LOOP TOPO
+
+    PUSH DX
+    MOV DL,10
+    MOV AH,02
+    INT 21H
+
+    MOV AH,09
+    LEA DX, msg5
+    INT 21H
+
+    POP DX
+    OR DL,30H
+    MOV AH,02
+    INT 21H
+    JMP FIM
+
+    
+
+
+
+
+    
+
+
 
 
 
