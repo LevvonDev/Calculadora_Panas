@@ -9,6 +9,8 @@ TITLE Leonardo Caberlim de Souza RA(22017958) Daniel Scanavini Rossi RA(22000787
     msg4 DB 'Por Favor, insira o segundo numero',10,'$'
     msg5 DB 'Resultado: ',10,'$'
     msg6 DB 'Divisao por zero, invalido, finalizando programa...',10,'$'
+    MSG7 DB 'resto da divisao:',10,'$'
+
 
 .CODE
     MAIN PROC
@@ -159,15 +161,17 @@ NNEG:
     INT 21H     ;imprime o resultado
     JMP FIM
 
-MULTI:
+MULTI:  
     MOV CX,8    ;inicia cx como 8
-    XOR DX,DX   ;zera dx
+    XOR DX,DX
+    XOR AX,AX 
+    MOV AL,BL
 TOPO:
     TEST BH,1     ;testa se o primeiro operando e impar  
     JZ OP	
-    ADD DH,BL   
+    ADD DX,AX   
 OP:
-    SHR DX,1    ;desloca dx para a direita
+    SHL AX,1    ;desloca dx para a direita
     SHR BH,1    ;desloca bh para a direita
     LOOP TOPO   
 
@@ -192,39 +196,60 @@ CONTINUA:
     INT 21H
     JMP FIM
 
-DIVI:
-    CMP BH,0    ;compara se o divisor e igual a zero
-    JE ZERO     ;se for, imprime uma mensagem e finaliza o programa
-    XOR CX,CX   ;zera cx
+DIVI:         ;divisor bh, dividendo bl->ax, quociente dx
+    MOV CX,9
+    XOR AH,AH
+    MOV AL,BL ;dividendo ->ax
+    CMP BH,0H
+    JZ ZERO   ;testa se o divisor e zero
+    XOR BL,BL
     XOR DL,DL
+DIVISAO:
+    SUB AX,BX   
+    JNS SALTA   ;se positivo bit 1 no quociente, caso contrario bit 0 no quociente
+    ADD AX,BX
+    MOV DH,0
+    JMP SALTA1
+SALTA:
+    MOV DH,1
 
-    MOV CL,BH   ;move o divisor para cl para servir como contador
-    CMP CL,BL   ;testa se o divisor e menor que o dividendo
-    JBE MENOR   
-
-MENOR:
-    SUB CL,1
-    JMP DIVIDE
-
-DIVIDE:
-    SHR BL,CL
-    LOOP DIVIDE
+SALTA1:
+    SHL DL,1    ;rotaciona o quociente
+    OR DL,DH    
+    SHR BX,1    ;rotaciona o duvisor
+    LOOP DIVISAO
     
+    MOV CH,DL
+    MOV CL,AL
 
     MOV DL,10   
-    MOV AH,02       ;imprime um 'pula linha'
-    INT 21H
+    MOV AH,02   
+    INT 21H     ;imprime um 'pula linha'
 
-    MOV AH,09   
-    LEA DX, msg5    ;imprime a mensagem 5
+    MOV AH,09
+    LEA DX,MSG5
     INT 21H
 
     
-    MOV DL,BL
-    OR DL,30H   ;transforma o resultado em um caracter para ser impresso na tela
-    MOV AH,02   ;imprime o resultado
-    INT 21H     
-    JMP FIM ;termina o programa
+    MOV DL,CH
+    OR DL,30H   ;converte o resultado para caracter
+    MOV AH,02
+    INT 21H
+
+    MOV DL,10   
+    MOV AH,02
+    INT 21H     ;imprime um pula linha
+
+    MOV AH,09
+    LEA DX,MSG7
+    INT 21h     ;imprime a mensagem de resto
+
+    MOV DL,CL
+    OR DL,30H   ;converte o resultado em caracter
+    MOV AH,02   
+    INT 21H
+    JMP FIM ;finaliza o programa
+
 ZERO:
     MOV DL,10   
     MOV AH,02   ;imprime um 'pula linha'
